@@ -1,13 +1,13 @@
 # Python Package
 
-_**python_package** Python parser_
+_**pyhub-cli** Python parser_
 
-![PyPI](https://img.shields.io/pypi/v/python_package) ![PyPI](https://img.shields.io/pypi/pyversions/python_package)
+![PyPI](https://img.shields.io/pypi/v/pyhub-cli) ![PyPI](https://img.shields.io/pypi/pyversions/pyhub-cli)
 
 ## Installation
 
 Install from PyPI:
 ```bash
-pip  install  python_package
+pip  install  pyhub-cli
 ```
 ## Usage
