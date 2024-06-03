@@ -27,6 +27,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "click>=8.1.6",
+        "requests",
     ],
     python_requires=">=3.10",
     extras_require={},
