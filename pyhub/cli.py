@@ -18,10 +18,9 @@ def repo():
 
 @click.command()
 @click.argument("name")
-@click.option("--private", "-p", is_flag=True, required=False, default=False)
-@click.option("--group", "-g", required=False)
-@click.option("--permission", "-p", required=False)
-def create(name, private, group, permission):
+@click.option("--private", "-p", is_flag=True, default=False)
+@click.option("--group", "-g", type=(str, str))
+def create(name, private, group):
     """Create a repository"""
 
     try:
@@ -33,15 +32,14 @@ def create(name, private, group, permission):
     client = DockerhubClient(**credentials)
 
     # Check repository
-    if name in client.get_repositories():
-        click.echo("Repository already exists.", err=True)
-        raise click.Abort()
+    if name not in client.get_repositories():
+        client.create_repository(name, private=private)
+    else:
+        click.echo("Skipping creation, repository already exists.", err=True)
 
-    client.create_repository(name, private=private)
-
-    if group and permission:
-        group_id = client.get_group_by_name(group)
-        client.set_permissions(name, group_id, permission)
+    if group:
+        group_id = client.get_group_by_name(group[0])
+        client.set_permissions(name, group_id, group[1])
 
 
 @click.command()
