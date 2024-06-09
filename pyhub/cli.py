@@ -24,11 +24,11 @@ def repo():
 @click.command()
 @click.argument("name")
 @click.option("--private", "-p", is_flag=True, default=False)
-@click.option("--group", "-g", type=(str, str))
+@click.option("--team", "-t", type=(str, str))
 @click.option("--username", required=True)
 @click.option("--password", required=True)
 @click.option("--org", required=True)
-def create(name, private, group, **credentials):
+def create(name, private, team, **credentials):
     """Create a repository"""
 
     client = DockerhubClient(**credentials)
@@ -39,17 +39,22 @@ def create(name, private, group, **credentials):
     else:
         click.echo("Skipping creation, repository already exists.")
 
-    if group:
-        team, permission = group
-        group_id = client.get_group_by_name(team)
+    if team:
+        group, permission = team
+        group_id = client.get_group_by_name(group)
 
-        click.echo(f"Add team {team} with {permission} permission.")
+        click.echo(f"Add team {group} with {permission} permission.")
         client.set_permissions(name, group_id, permission)
 
 
 @click.command()
-@click.option("--output", "-o", required=False, default="plain")
-@click.option("--separator", "-s", required=False, default=", ")
+@click.option(
+    "--output",
+    "-o",
+    type=click.Choice(["json", "text"], case_sensitive=False),
+    default="text",
+)
+@click.option("--separator", "-s", default=", ")
 @click.option("--username", required=True)
 @click.option("--password", required=True)
 @click.option("--org", required=True)
@@ -59,11 +64,7 @@ def list(output, separator, **credentials):
     client = DockerhubClient(**credentials)
     res = client.get_repositories()
 
-    if output not in ["plain", "json"]:
-        click.echo("Output not supported.", err=True)
-        raise click.Abort()
-
-    if output == "plain":
+    if output == "text":
         content = separator.join(res)
 
     if output == "json":
@@ -74,7 +75,12 @@ def list(output, separator, **credentials):
 
 @click.command()
 @click.argument("repository")
-@click.option("--output", "-o", default="plain", help="Output format: plain/json")
+@click.option(
+    "--output",
+    "-o",
+    type=click.Choice(["json", "text"], case_sensitive=False),
+    default="text",
+)
 @click.option(
     "--separator", "-s", default=", ", help="Separator for plain text format."
 )
@@ -94,11 +100,7 @@ def tags(output, repository, separator, field, **credentials):
     client = DockerhubClient(**credentials)
     res = client.get_tags(repository, **options)
 
-    if output not in ["plain", "json"]:
-        click.echo("Output not supported.", err=True)
-        raise click.Abort()
-
-    if output == "plain":
+    if output == "text":
         content = separator.join(res)
 
     if output == "json":
