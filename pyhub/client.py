@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from urllib.parse import urlparse, parse_qs
 import requests
 
 API_VERSION = "v2"
@@ -101,9 +101,10 @@ class DockerhubClient:
         self,
         repository: str,
         page: int = 1,
-        page_size: int = 25,
+        page_size: int = 100,
         ordering="last_updated",
         fields=["name"],
+        follow: bool = True,
     ) -> dict:
         """List all tags from a repository"""
 
@@ -117,7 +118,18 @@ class DockerhubClient:
                     "ordering": ordering,
                 },
             )
-            page = res.get("next")
+            url = res.get("next")
+            parsed_url = urlparse(url)
+            query = parse_qs(parsed_url.query)
+
+            if "page" in query:
+                page = int(query.get("page")[0])
+            else:
+                page = False
+
+            if not follow:
+                break
+
             results += res["results"]
 
         if len(fields) == 1:

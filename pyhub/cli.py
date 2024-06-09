@@ -5,8 +5,13 @@ import click
 from pyhub.client import DockerhubClient
 from pyhub.tools import get_credentials_from_env
 
+CONTEXT_SETTINGS = dict(
+    help_option_names=["-h", "--help"],
+    auto_envvar_prefix="PYHUB",
+)
 
-@click.group()
+
+@click.group(context_settings=CONTEXT_SETTINGS)
 def main():
     """DockerHub client"""
 
@@ -20,14 +25,11 @@ def repo():
 @click.argument("name")
 @click.option("--private", "-p", is_flag=True, default=False)
 @click.option("--group", "-g", type=(str, str))
-def create(name, private, group):
+@click.option("--username", required=True)
+@click.option("--password", required=True)
+@click.option("--org", required=True)
+def create(name, private, group, **credentials):
     """Create a repository"""
-
-    try:
-        credentials = get_credentials_from_env()
-    except ValueError as error:
-        click.echo(error, err=True)
-        raise click.Abort()
 
     client = DockerhubClient(**credentials)
 
@@ -48,14 +50,11 @@ def create(name, private, group):
 @click.command()
 @click.option("--output", "-o", required=False, default="plain")
 @click.option("--separator", "-s", required=False, default=", ")
-def list(output, separator):
+@click.option("--username", required=True)
+@click.option("--password", required=True)
+@click.option("--org", required=True)
+def list(output, separator, **credentials):
     """List repositories"""
-
-    try:
-        credentials = get_credentials_from_env()
-    except ValueError as error:
-        click.echo(error, err=True)
-        raise click.Abort()
 
     client = DockerhubClient(**credentials)
     res = client.get_repositories()
@@ -75,32 +74,18 @@ def list(output, separator):
 
 @click.command()
 @click.argument("repository")
+@click.option("--output", "-o", default="plain", help="Output format: plain/json")
 @click.option(
-    "--output", "-o", required=False, default="plain", help="Output format: plain/json"
+    "--separator", "-s", default=", ", help="Separator for plain text format."
 )
 @click.option(
-    "--separator",
-    "-s",
-    required=False,
-    default=", ",
-    help="Separator for plain text format, default: ', '",
+    "--field", "-f", multiple=True, default=[], help="Fields (can be multiple)"
 )
-@click.option(
-    "--field",
-    "-f",
-    multiple=True,
-    required=False,
-    default=[],
-    help="Fields (can be multiple), eg: -f name",
-)
-def tags(output, repository, separator, field):
+@click.option("--username", required=True)
+@click.option("--password", required=True)
+@click.option("--org", required=True)
+def tags(output, repository, separator, field, **credentials):
     """List tags from repository"""
-
-    try:
-        credentials = get_credentials_from_env()
-    except ValueError as error:
-        click.echo(error, err=True)
-        raise click.Abort()
 
     options = {}
     if field:
