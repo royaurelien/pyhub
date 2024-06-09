@@ -35,11 +35,14 @@ def create(name, private, group):
     if name not in client.get_repositories():
         client.create_repository(name, private=private)
     else:
-        click.echo("Skipping creation, repository already exists.", err=True)
+        click.echo("Skipping creation, repository already exists.")
 
     if group:
-        group_id = client.get_group_by_name(group[0])
-        client.set_permissions(name, group_id, group[1])
+        team, permission = group
+        group_id = client.get_group_by_name(team)
+
+        click.echo(f"Add team {team} with {permission} permission.")
+        client.set_permissions(name, group_id, permission)
 
 
 @click.command()
